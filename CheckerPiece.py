@@ -8,3 +8,6 @@ class CheckerPiece:
     def update_loc(self, row, col):
         self.row = row
         self.col = col
+        
+    def __str__(self):
+        return str(self.row)+str(self.col);
