@@ -81,14 +81,23 @@ class CheckerBoard:
         if reg_moves[0] != None and jmp_moves[0] != None:
             square = self.frame.grid_slaves(jmp_moves[0][0], jmp_moves[0][1])[0]
             if self.found_opponent_piece(self.AI_pieces, CheckerPiece("black", reg_moves[0][0], reg_moves[0][1], False)) and square.find_all() is ():
-                leg_moves.append(jmp_moves[0])
+                leg_moves.append(jmp_moves[0]+reg_moves[0]) #appends a tuple of four elements: (j_r, j_c, o_r, o_c)
         #check right if valid
         if reg_moves[1] != None and jmp_moves[1] != None:
             square = self.frame.grid_slaves(jmp_moves[1][0], jmp_moves[1][1])[0]
             if self.found_opponent_piece(self.AI_pieces, CheckerPiece("black", reg_moves[1][0], reg_moves[1][1], False)) and square.find_all() is ():
-                leg_moves.append(jmp_moves[1])
+                leg_moves.append(jmp_moves[1]+reg_moves[1])
+                
+        #if there are jump moves, carry out jump moves
+        if len(leg_moves) != 0:
+            tiles = []
+            for m in leg_moves:
+                tiles.append(((m[0],m[1]), (m[2],m[3]), self.frame.grid_slaves(m[0],m[1])[0]))
+            for t in tiles:
+                t[2].config(bg="red")
+                t[2].bind("<Button-1>", lambda event, ind=ind, coords=t[0], opp=t[1], tiles=tiles: self.player_jmp_move_piece(event, ind, coords, opp, tiles))
         #if no jump moves, determine all regular moves
-        if len(leg_moves) == 0:
+        else:
             #check left if valid
             if reg_moves[0] != None:
                 square = self.frame.grid_slaves(reg_moves[0][0], reg_moves[0][1])[0]
@@ -99,15 +108,15 @@ class CheckerBoard:
                 square = self.frame.grid_slaves(reg_moves[1][0], reg_moves[1][1])[0]
                 if square.find_all() is ():
                     leg_moves.append(reg_moves[1])
-        print(leg_moves)
-        
-        #highlight the tiles the piece can move to (number and map to keyboard)
-        tiles = []
-        for m in leg_moves:
-            tiles.append(((m[0],m[1]), self.frame.grid_slaves(m[0],m[1])[0]))
-        for t in tiles:
-            t[1].config(bg="red")
-            t[1].bind("<Button-1>", lambda event, ind=ind, coords=t[0], tiles=tiles: self.player_move_piece(event, ind, coords, tiles))
+            #carry out regular moves
+            tiles = []
+            for m in leg_moves:
+                tiles.append(((m[0],m[1]), self.frame.grid_slaves(m[0],m[1])[0]))
+            for t in tiles:
+                t[1].config(bg="red")
+                t[1].bind("<Button-1>", lambda event, ind=ind, coords=t[0], tiles=tiles: self.player_reg_move_piece(event, ind, coords, tiles))
+        for i in self.AI_pieces:
+            print(str(i.row)+str(i.col)+str(i.on_board))
             
         #update play status to AI's turn
         self.play_status = 2
@@ -146,8 +155,8 @@ class CheckerBoard:
                 found_opp = True
         return found_opp
     
-    #move checker piece from current location to location indicated by coords
-    def player_move_piece(self, event, ind, coords, tiles):
+    #make regular move from current location to location indicated by coords
+    def player_reg_move_piece(self, event, ind, coords, tiles):
         tag="p"+str(ind)
         curr_row = self.player_pieces[ind].row
         curr_col = self.player_pieces[ind].col
@@ -164,3 +173,29 @@ class CheckerBoard:
         #update CheckerPiece info in the list
         self.player_pieces[ind].row = coords[0]
         self.player_pieces[ind].col = coords[1]
+    
+    #make jump move: move from current location to location indicated by coords AND capture opponent's piece
+    def player_jmp_move_piece(self, event, ind, coords, opp, tiles):
+        tag = "p"+str(ind)
+        curr_row = self.player_pieces[ind].row
+        curr_col = self.player_pieces[ind].col
+        curr_sq = self.frame.grid_slaves(curr_row, curr_col)[0]
+        curr_sq.delete(ALL) #delete checker piece at current location
+        new_sq = self.frame.grid_slaves(coords[0], coords[1])[0]
+        #create checker piece in the new location
+        new_sq.create_oval(10,10,90,90,fill=self.player_pieces[ind].color, tags=tag)
+        new_sq.tag_bind(tag, '<1>', lambda event, tag=tag: self.player_move(event,tag))
+        #delete opponent's checker piece
+        opp_sq = self.frame.grid_slaves(opp[0], opp[1])[0]
+        opp_sq.delete(ALL)
+        self.player_score += 1 #update player's score
+        #unbind the events from the highlighted tiles and unhighlight
+        for t in tiles:
+            t[2].config(bg="gray")
+            t[2].unbind("<Button-1>")
+        #update CheckerPiece info in the list
+        self.player_pieces[ind].row = coords[0]
+        self.player_pieces[ind].col = coords[1]
+        for p in self.AI_pieces:
+            if p.row == opp[0] and p.col == opp[1]:
+                p.on_board = False
