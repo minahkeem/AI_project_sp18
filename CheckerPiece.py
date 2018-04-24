@@ -1,9 +1,8 @@
 class CheckerPiece:
-    def __init__(self, color, row, col, on_b):
+    def __init__(self, color, row, col):
         self.color = color
         self.row = row
         self.col = col
-        self.on_board = on_b
         
     def update_loc(self, row, col):
         self.row = row
