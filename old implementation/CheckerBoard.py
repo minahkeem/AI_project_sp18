@@ -21,7 +21,6 @@ class CheckerBoard:
         self.AI_pieces.append(CheckerPiece("white",0,3))
         self.AI_pieces.append(CheckerPiece("white",1,4))
         self.AI_pieces.append(CheckerPiece("white",0,5))
-        self.AI_pieces.append(CheckerPiece("white",3,2))
         
         #pack in player's checker pieces, initial positions
         self.player_pieces = []
@@ -56,15 +55,16 @@ class CheckerBoard:
         
     '''place AI and player checker pieces on the board'''
     def place_checkers_init(self):
-        for i,AI_piece in enumerate(self.AI_pieces):
+        for i,AI_piece in enumerate(self.AI_pieces): #placing AI checker pieces
             tag = "AI"+str(i)
             square = self.frame.grid_slaves(AI_piece.row, AI_piece.col)[0]
             piece = square.create_oval(10,10,90,90,fill=AI_piece.color, tags=tag)
             
-        for i,player_piece in enumerate(self.player_pieces):
+        for i,player_piece in enumerate(self.player_pieces): #placing player checker pieces
             tag = "p"+str(i)
             square = self.frame.grid_slaves(player_piece.row, player_piece.col)[0]
             piece = square.create_oval(10,10,90,90,fill=player_piece.color, tags=tag)
+            #bind each checker piece to action "player_move"
             square.tag_bind(tag, '<1>', lambda event,tag=tag: self.player_move(event,tag))
     
     '''general methods:
@@ -90,17 +90,43 @@ class CheckerBoard:
             self.AI_move()
     
     '''AI methods:
-    AI_move'''
+    AI_move, AI_get_reg_moves, AI_get_jmp_moves'''
+    
+    '''this function is called when it is the AI turn'''
     def AI_move(self):
         #update play_status to 1 (player's turn)
-        #self.play_status = 1
-        pass
+        self.play_status = 1
     
+    '''returns a list of left and right regular moves of AI (within bounds)'''
+    def AI_get_reg_moves(self, row, col):
+        moves = []
+        if row+1 <=5 and col-1 >=0:
+            moves.append((row+1, col-1))
+        else:
+            moves.append(None)
+        if row+1 <=5 and col+1 <=5:
+            moves.append((row+1, col+1))
+        else:
+            moves.append(None)
+        return moves
+    
+    '''returns a list of left and right jump moves of AI (within bounds)'''
+    def AI_get_jmp_moves(self, row, col):
+        moves = []
+        if row+2 <=5 and col-2 >=0:
+            moves.append((row+2, col-2))
+        else:
+            moves.append(None)
+        if row+2 <=5 and col+2 <=5:
+            moves.append((row+2, col+2))
+        else:
+            moves.append(None)
+        return moves
     
     '''player methods:
     player_move, p_get_reg_moves, p_get_jmp_moves, player_reg_move_piece, player_jmp_move_piece'''
     
-    '''this function is triggered when a player checker piece is clicked'''
+    '''this function is called when a player checker piece is clicked'''
     def player_move(self, event, tag):
         if self.play_status == 2:
             return
@@ -158,7 +184,7 @@ class CheckerBoard:
         self.play_status = 2
         self.AI_move()
     
-    '''returns a list of left and right regular moves (within bounds)'''
+    '''returns a list of left and right regular moves of player (within bounds)'''
     def p_get_reg_moves(self, row, col):
         moves = []
         if row-1 >=0 and col-1 >=0:
@@ -171,7 +197,7 @@ class CheckerBoard:
             moves.append(None)
         return moves
     
-    '''returns a list of left and right jump moves (within bounds)'''
+    '''returns a list of left and right jump moves of player (within bounds)'''
     def p_get_jmp_moves(self, row, col):
         moves = []
         if row-2 >=0 and col-2 >=0:
