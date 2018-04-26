@@ -40,6 +40,11 @@ class Board:
         self.board[4][3][1] = Board.CheckerPiece("black", 4, 3, "P3")
         self.board[5][4][1] = Board.CheckerPiece("black", 5, 4, "P4")
         self.board[4][5][1] = Board.CheckerPiece("black", 4, 5, "P5")
+        
+        self.player_score = 0
+        self.AI_score = 0
+
+        self.num_jumps = 0 #for use in eval function in AB tree
     
     '''updates the board with new move; only called when a legal move is chosen'''
     def set_board(self, piece_id, new_loc):
@@ -56,6 +61,10 @@ class Board:
             nc = new_loc[1]
             oppr = new_loc[2]
             oppc = new_loc[3]
+            if curr.color == "white":
+                self.AI_score += 1
+            else:
+                self.player_score += 1
             #place a CheckerPiece with same attributes as the curr in jump location
             self.board[nr][nc][1] = Board.CheckerPiece(curr.color, nr, nc, curr.piece_id)
             #delete captured opponent's CheckerPiece
@@ -97,6 +106,7 @@ class Board:
                             sq = self.board[jmp[1][0]][jmp[1][1]][1]
                             if opp is not None and opp.color is "black" and sq is None:
                                 piece_moves.append(jmp[1]+reg[1]) #(j_r, j_c, o_r, o_c)
+                        self.num_jumps = len(piece_moves)
                         if len(piece_moves) == 0: #if no jump moves, determine regular moves
                             #determine if there are regular moves left of the piece
                             if reg[0] != None:
@@ -166,6 +176,7 @@ class Board:
                             sq = self.board[jmp[1][0]][jmp[1][1]][1]
                             if opp is not None and opp.color is "white" and sq is None:
                                 piece_moves.append(jmp[1]+reg[1]) #(j_r, j_c, o_r, o_c)
+                        self.num_jumps = len(piece_moves)
                         if len(piece_moves) == 0: #if no jump moves, determine regular moves
                             #determine if there are regular moves left of the piece
                             if reg[0] != None:
