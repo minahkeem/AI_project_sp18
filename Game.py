@@ -7,30 +7,54 @@ class Game:
         
         self.state = Board() #initial board info
         
+        self.AI_score = self.state.AI_score
+        self.player_score = self.state.player_score
+        
         self.game_loop()
     
     def game_loop(self):
-        done = False
-        while not done:
+        while not self.done():
             if self.turn == 1:
                 print("\nYour turn!")
                 moves = self.display_legal_moves()
                 self.move_piece(moves)
-                print("\nHere's your board after your move:\n")
+                print("\nHere's what the board currently looks like:\n")
                 print(self.state)
+                print("Current score: "+str(self.AI_score)+" for the computer, "+str(self.player_score)+" for you")
                 self.turn = 2
             else:
                 print("\nWait!... the computer is calculating its move")
                 tree = ABTree(self.state)
                 tree.build_tree()
                 res = tree.AB_search()
-                self.state = res[0]
-                print("Depth: "+str(res[1])+", Total # of nodes: "+str(res[2])+", Max prune: "+str(res[3])+", Min prune: "+str(res[4]))
+                if res is not None:
+                    self.state = res[0]
+                else:
+                    self.state = None
+                if self.state is not None:
+                    self.AI_score = self.state.AI_score
+                    self.player_score = self.state.player_score
+                    print("Depth: "+str(res[1])+", Total # of nodes: "+str(res[2])+", Max prune: "+str(res[3])+", Min prune: "+str(res[4]))
+                    print("\nCurrent score: "+str(self.AI_score)+" for the computer, "+str(self.player_score)+" for you")
                 self.turn = 1
+    
+    '''Checks status of the game: if a player won or there was a draw'''
+    def done(self):
+        if self.state is None: #game has ended--no legal moves on either side
+            if self.AI_score == self.player_score: #draw
+                print("\nIt was a draw with "+str(self.AI_score)+" for the computer and "+str(self.player_score)+" for you!")
+            elif self.AI_score > self.player_score: #AI had higher score
+                print("\nAw... you lost! The score was "+str(self.AI_score)+" for the computer and "+str(self.player_score)+" for you!")
+            else:
+                print("\nYes, you won! The score was "+str(self.AI_score)+" for the computer and "+str(self.player_score)+" for you!")
+            return True
+        return False
     
     '''move piece by taking in input from player'''
     def move_piece(self, moves):
         if moves is None:
+            if self.AI_score == 6:
+                self.state = None
             return
         correct_input = False
         curr_row = 0
@@ -64,7 +88,11 @@ class Game:
                     break
             if correct_input == False:
                 print("\nInvalid input--please enter again")
-        self.state.set_board(curr, new_loc)
+                
+        self.state.set_board(curr, new_loc) #update board
+        #update scores
+        self.AI_score = self.state.AI_score
+        self.player_score = self.state.player_score
     
     '''display all legal moves for the player (prioritizing jump moves)'''
     def display_legal_moves(self):
@@ -84,7 +112,7 @@ class Game:
         if len(jmp_moves) != 0: #prioritizing jump moves
             print("\nHere's what the board currently looks like:\n")
             print(self.state)
-            print("\nHere are your list of moves:")
+            print("Here are your list of moves:")
             for move in jmp_moves:
                 curr = self.state.find_piece(move[0])
                 print("From ("+str(curr.row+1)+", "+str(curr.col+1)+"), you can jump to ("+str(move[1]+1)+", "+str(move[2]+1)+") and capture opponent in ("+str(move[3]+1)+", "+str(move[4]+1)+")")
@@ -92,7 +120,7 @@ class Game:
         elif len(reg_moves) != 0: #if no jump moves, give regular moves
             print("\nHere's what the board currently looks like:\n")
             print(self.state)
-            print("\nHere are your list of moves:")
+            print("Here are your list of moves:")
             for move in reg_moves:
                 curr = self.state.find_piece(move[0])
                 print("From ("+str(curr.row+1)+", "+str(curr.col+1)+"), you can move to ("+str(move[1]+1)+", "+str(move[2]+1)+")")

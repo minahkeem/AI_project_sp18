@@ -124,6 +124,7 @@ class ABTree:
             if move.v == self.root.v:
                 self.AB_search_results = (move.curr_board, self.max_depth(), self.total, self.max_prune, self.min_prune)
                 return self.AB_search_results
+        return None
     
     def max_value(self, node, a, b):
         if self.terminal_test(node) == True:
