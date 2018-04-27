@@ -24,6 +24,7 @@ class ABTree:
         self.max_prune = 0
         self.min_prune = 0
         self.root.level = 1 #starts out with max
+        self.AB_search_results = None
     
     '''returns a list of legal states (child Nodes) for current state'''
     def generate_nodes(self, curr):
@@ -121,7 +122,8 @@ class ABTree:
         self.root.v = self.max_value(self.root, -100, 100) #initial a = -100, b = 100
         for move in self.root.legal_sts:
             if move.v == self.root.v:
-                return (move.curr_board, self.max_depth(), self.total, self.max_prune, self.min_prune)
+                self.AB_search_results = (move.curr_board, self.max_depth(), self.total, self.max_prune, self.min_prune)
+                return self.AB_search_results
     
     def max_value(self, node, a, b):
         if self.terminal_test(node) == True:

@@ -45,7 +45,12 @@ class Board:
         self.AI_score = 0
 
         self.num_jumps = 0 #for use in eval function in AB tree
-    
+    '''return piece id at given row, col'''
+    def get_piece_id(self, row, col):
+        if self.board[row][col][1] is None:
+            return None
+        else:
+            return self.board[row][col][1].piece_id
     '''updates the board with new move; only called when a legal move is chosen'''
     def set_board(self, piece_id, new_loc):
         curr = self.find_piece(piece_id)
@@ -224,17 +229,17 @@ class Board:
     space = white tile, '-' = gray tile
     'w' = AI piece, 'b' = player piece'''
     def __repr__(self):
-        bd = ""
+        bd = "  1 2 3 4 5 6\n"
         for i in range(len(self.board)):
-            line = ""
+            line = str(i+1)+" "
             for j in range(len(self.board[i])):
                 if self.board[i][j][0] is False:
-                    line += " "
+                    line += "- "
                 elif self.board[i][j][1] is None:
-                    line += "-"
+                    line += "- "
                 elif self.board[i][j][1].color is "white":
-                    line += "w"
+                    line += "X "
                 elif self.board[i][j][1].color is "black":
-                    line += "b"
+                    line += "O "
             bd += line+"\n"
         return bd
