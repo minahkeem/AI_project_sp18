@@ -12,7 +12,7 @@ class Board:
             return self.piece_id == other.piece_id
         
         
-    def __init__(self, play_status):
+    def __init__(self):
         self.board = [] #6x6 board with info about checker pieces in a list
 
         #create board of white and gray tiles
@@ -106,7 +106,7 @@ class Board:
                             sq = self.board[jmp[1][0]][jmp[1][1]][1]
                             if opp is not None and opp.color is "black" and sq is None:
                                 piece_moves.append(jmp[1]+reg[1]) #(j_r, j_c, o_r, o_c)
-                        self.num_jumps = len(piece_moves)
+                        self.num_jumps += len(piece_moves)
                         if len(piece_moves) == 0: #if no jump moves, determine regular moves
                             #determine if there are regular moves left of the piece
                             if reg[0] != None:
@@ -176,7 +176,7 @@ class Board:
                             sq = self.board[jmp[1][0]][jmp[1][1]][1]
                             if opp is not None and opp.color is "white" and sq is None:
                                 piece_moves.append(jmp[1]+reg[1]) #(j_r, j_c, o_r, o_c)
-                        self.num_jumps = len(piece_moves)
+                        self.num_jumps += len(piece_moves)
                         if len(piece_moves) == 0: #if no jump moves, determine regular moves
                             #determine if there are regular moves left of the piece
                             if reg[0] != None:

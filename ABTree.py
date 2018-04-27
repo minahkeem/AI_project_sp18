@@ -54,7 +54,7 @@ class ABTree:
             return []
         else: #if there are no legal moves, forfeit turn
             if curr.forfeited == False: #if parent is first to forfeit
-                child = ABTree.Node(copy.deepcopy(curr_board))
+                child = ABTree.Node(copy.deepcopy(curr.curr_board))
                 #child node has same board as parent node
                 child.prev_st = curr
                 if curr.level == 1:
