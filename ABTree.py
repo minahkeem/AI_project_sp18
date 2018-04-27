@@ -129,11 +129,16 @@ class ABTree:
     def max_value(self, node, a, b):
         if self.terminal_test(node) == True:
             if node.legal_sts == [] and node.curr_board.AI_score == 6: #if state shows AI's win
-                return 10*node.curr_board.AI_score
+                return 60
             elif node.legal_sts == [] and node.curr_board.player_score == 6: #if state shows player's win
-                return -5*node.curr_board.player_score
-            elif node.legal_sts == []: #if there was a draw
-                return 10*node.curr_board.AI_score-5*node.curr_board.player_score
+                return -30
+            elif node.legal_sts == []: #if there are no more legal moves
+                if node.curr_board.AI_score == node.curr_board.player_score: #draw
+                    return 15
+                elif node.curr_board.AI_score > node.curr_board.player_score: #AI wins
+                    return 28
+                elif node.curr_board.AI_score < node.curr_board.player_score: #player wins
+                    return 2
             elif node.legal_sts is None: #if cutoff leaf is at max level
                 return 10*node.curr_board.AI_score-5*node.curr_board.player_score+node.curr_board.num_jumps
         node.v = -100
@@ -148,11 +153,16 @@ class ABTree:
     def min_value(self, node, a, b):
         if self.terminal_test(node) == True:
             if node.legal_sts == [] and node.curr_board.AI_score == 6: #if state shows AI's win
-                return 10*node.curr_board.AI_score
+                return 60
             elif node.legal_sts == [] and node.curr_board.player_score == 6: #if state shows player's win
-                return -5*node.curr_board.player_score
-            elif node.legal_sts == []: #if there was a draw
-                return 10*node.curr_board.AI_score-5*node.curr_board.player_score
+                return -30
+            elif node.legal_sts == []: #if there are no more legal moves
+                if node.curr_board.AI_score == node.curr_board.player_score: #draw
+                    return 15
+                elif node.curr_board.AI_score > node.curr_board.player_score: #AI wins
+                    return 28
+                elif node.curr_board.AI_score < node.curr_board.player_score: #player wins
+                    return 2
             elif node.legal_sts is None: #if cutoff leaf is at min level
                 return 10*node.curr_board.AI_score-5*node.curr_board.player_score-node.curr_board.num_jumps
         node.v = 100
